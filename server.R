@@ -19,7 +19,7 @@ shinyServer(function(input, output) {
       p1[[i]]<-(R_-1)/(g1[i]-1)
     }
     layout(cbind(1, 2), width=c(7, 1))
-    plot(R_,p1[[1]],ylim=c(0,1),type='l',xlim=c(1,4),ylab="Prevalence in exposed population",xlab=expression(paste("Robust Threshold Upper Confidence Limit Size exp(",beta,'*'[tcl],")")),xaxt="n",yaxt="n",col="gray88",lwd=4)
+    plot(R_,p1[[1]],ylim=c(0,1),type='l',xlim=c(1,4),ylab="Prevalence in exposed population",xlab=expression(paste("Robust Threshold Lower Confidence Limit Size exp(",beta,'*'[tcl],")")),xaxt="n",yaxt="n",col="gray88",lwd=4)
     axis(1)
     axis(2,las=2)
     lines(R_,p1[[2]],col="gray77",lwd=4)
