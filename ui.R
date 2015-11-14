@@ -10,7 +10,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       numericInput("R",
-                  "Upper Confidence Limit:",
+                  "Lower Confidence Limit:",
                   min = 1,
                   max = 4,
                   value = 2)
