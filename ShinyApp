@@ -1,0 +1,107 @@
+load(file="~/Documents/Conferences/R/zipPlt.RData")
+require(ggplot2)
+require(ggmap)
+require(shiny)
+require(shinythemes)
+load(file="~/Documents/Conferences/R/publix.RData")
+load(file="~/Documents/Conferences/R/addy.RData")
+load(file="~/Documents/Conferences/R/x.RData")
+load(file="~/Documents/Conferences/R/store.RData")
+load(file="~/Documents/Conferences/R/coffee.RData")
+
+shinyApp(
+    shinyUI(
+        fluidPage( theme = shinytheme("cerulean"),
+        headerPanel("Nashville Housing Decision Tool"),
+            sidebarLayout(
+                sidebarPanel(
+                        p("Welcome to Nashville! We are so excited that you've decided to join Vanderbilt's Biostatistics graduate program. We want your transition to be as smooth as possible. As such, I have compiled various data, from current student's housing locations, to locations of grocery stores, to act as a housing decision aid. Select layers from the list below to add them to the map on the right. Happy planning!"),
+					h4("Choose layers to overlay on the plot"),
+					                    selectInput("housing", "Select Your Housing Interest", c("","Median Rental Cost"="mrc","Median Condo Value"="mcv","Median Single Family Home Value"="mhv","Median 2-Bedroom Home Value"="m2b","Median 3-Bedroom Home Value"="m3b","Median 4-Bedroom Home Value"="m4b"), selected = NULL, multiple = FALSE, selectize = TRUE, width = NULL, size = NULL),
+                
+                    checkboxInput("addy", "Current Student's Housing Locations "),
+                     selectInput("grocery","Select Your Preferred Grocery Store",c("","All Grocery Stores"="allg","Publix"="pub","Trader Joes"="tj","Whole Foods"="wf","Kroger"="kr","Piggly Wiggly"="pw"),multiple=FALSE),
+
+                    checkboxInput("coffee", "Coffee Shops")
+                    ),
+                   
+                mainPanel(
+                    plotOutput("plot")
+                )
+            )
+        )
+    ),
+    shinyServer(function(input, output, session) {
+        vals <- reactiveValues(pdata=ggplot())
+
+        observe({
+            input$addy; input$housing; input$grocery; input$coffee
+            p1=ggmap(x)
+            p1=p1+labs(title="Interactive Map of Nashville")
+			if (input$housing=="mhv"){
+p1=p1+geom_polygon(data=zipPlt,aes(x=long,y=lat,group=id,fill=medSingHomeValLev),color="black",alpha=0.2)
+p1=p1+scale_fill_manual(name="Median Single Family Home Value", values=rainbow(20)[c(2,4,8,12,14,16,18)])
+p1=p1+theme(legend.position="bottom",plot.title=element_text(face="bold"))
+}
+		if (input$housing=="mcv"){
+p1=p1+geom_polygon(data=zipPlt,aes(x=long,y=lat,group=id,fill=medCondValLev),color="black",alpha=0.2)
+p1=p1+scale_fill_manual(name="Median Condo Value", values=rainbow(20)[c(2,4,8,12,14,16,18)])
+p1=p1+theme(legend.position="bottom",plot.title=element_text(face="bold"))
+}
+		if (input$housing=="m2b"){
+p1=p1+geom_polygon(data=zipPlt,aes(x=long,y=lat,group=id,fill=med2BedValLev),color="black",alpha=0.2)
+p1=p1+scale_fill_manual(name="Median 2-Bedroom Home Value", values=rainbow(20)[c(2,4,8,12,14,16,18)])
+p1=p1+theme(legend.position="bottom",plot.title=element_text(face="bold"))
+}
+		if (input$housing=="m3b"){
+p1=p1+geom_polygon(data=zipPlt,aes(x=long,y=lat,group=id,fill=med3BedValLev),color="black",alpha=0.2)
+p1=p1+scale_fill_manual(name="Median 3-Bedroom Home Value", values=rainbow(20)[c(2,4,8,12,14,16,18)])
+p1=p1+theme(legend.position="bottom",plot.title=element_text(face="bold"))
+}
+		if (input$housing=="m4b"){
+p1=p1+geom_polygon(data=zipPlt,aes(x=long,y=lat,group=id,fill=med4BedValLev),color="black",alpha=0.2)
+p1=p1+scale_fill_manual(name="Median 4-Bedroom Home Value", values=rainbow(20)[c(2,4,8,12,14,16,18)])
+p1=p1+theme(legend.position="bottom",plot.title=element_text(face="bold"))
+}
+		if (input$housing=="mrc"){
+p1=p1+geom_polygon(data=zipPlt,aes(x=long,y=lat,group=id,fill=medRentLev),color="black",alpha=0.2)
+p1=p1+scale_fill_manual(name="Median Rental Cost", values=rainbow(20)[c(4,8,12,16,20)])
+p1=p1+theme(legend.position="bottom",plot.title=element_text(face="bold"))
+}
+#grocery
+			if (input$grocery=="tj")
+			p1=p1+geom_point(data=store.dat[store.dat$name=="Trader Joe's",],aes(x=long,y=lat),alpha=.5,size=5,col=4)
+			
+			if (input$grocery=="pub")
+			p1=p1+geom_point(data=store.dat[store.dat$name=="Publix",],aes(x=long,y=lat),alpha=.5,col=4,size=5)
+			
+			if (input$grocery=="wf")
+			p1=p1+geom_point(data=store.dat[store.dat$name=="Whole Foods",],aes(x=long,y=lat),alpha=.5,col=4,size=5)
+			if (input$grocery=="kr")
+			p1=p1+geom_point(data=store.dat[store.dat$name=="Kroger",],aes(x=long,y=lat),alpha=.5,col=4,size=5)
+			
+			if (input$grocery=="pw")
+			p1=p1+geom_point(data=store.dat[store.dat$name=="Piggly Wiggly",],aes(x=long,y=lat),alpha=.5,col=4,size=5)
+			
+			 if (input$grocery=="allg")
+			p1=p1+geom_point(data=store.dat,aes(name="Grocery Stores",x=long,y=lat),alpha=.5,col=4,size=5)
+             
+             
+            if (input$addy)
+             p1=p1+geom_jitter(data=addy,aes(x=long,y=lat),alpha=.5,width=.01,size=5,col=3)
+             
+             if (input$coffee)
+             p1=p1+geom_point(data=coffee.dat,aes(x=long,y=lat),alpha=.5,size=5,col="brown")
+             
+
+			
+            vals$pdata <- p1
+        })
+
+        observeEvent(vals$pdata,{ 
+            output$plot <- renderPlot({
+                isolate(vals$pdata)
+            }, height = 600, width = 600)
+        })
+    })
+)
